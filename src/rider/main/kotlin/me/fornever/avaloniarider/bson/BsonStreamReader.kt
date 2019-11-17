@@ -1,5 +1,6 @@
 package me.fornever.avaloniarider.bson
 
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.jetbrains.rd.util.getLogger
@@ -17,6 +18,7 @@ class BsonStreamReader(private val typeRegistry: Map<UUID, Class<*>>, private va
         private val logger = getLogger<BsonStreamReader>()
         private val objectMapper = ObjectMapper(BsonFactory()).apply {
             configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
+            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         }
     }
 

@@ -23,6 +23,7 @@ import me.fornever.avaloniarider.me.fornever.avaloniarider.AvaloniaPreviewerWind
 import java.awt.Dimension
 import java.io.DataInputStream
 import java.net.ServerSocket
+import java.net.URI
 import java.nio.file.Path
 
 /**
@@ -91,6 +92,7 @@ class AvaloniaPreviewerSession(
     }.apply { start() }
 
     private fun createWindow() = AvaloniaPreviewerWindow().apply {
+        isVisible = true
         lifetime.onTermination {
             dispose()
         }
@@ -135,6 +137,10 @@ class AvaloniaPreviewerSession(
         when (message) {
             is StartDesignerSessionMessage -> {
                 onXamlChanged()
+                // TODO[F]: Remove the block below
+                application.invokeLater {
+                    window.connectTo(URI("https://example.com"))
+                }
             }
             is UpdateXamlResultMessage -> message.error?.let {
                 logger.error { "Error from UpdateXamlResultMessage: $it" }
@@ -149,15 +155,7 @@ class AvaloniaPreviewerSession(
                 writer.sendMessage(ClientViewportAllocatedMessage(message.width, message.height, dpi, dpi))
                 writer.sendMessage(ClientSupportedPixelFormatsMessage(intArrayOf(1)))
             }
-            is FrameMessage -> {
-                UIUtil.invokeAndWaitIfNeeded(Runnable {
-                    window.isVisible = true
-                    window.size = Dimension(message.width, message.height)
-                    window.drawFrame(message)
-                })
-
-                writer.sendMessage(FrameReceivedMessage(message.sequenceId))
-            }
+            // TODO[F]: Gather the backend URL from the designer process, and then call window.connectTo(url)
         }
     }
 }
